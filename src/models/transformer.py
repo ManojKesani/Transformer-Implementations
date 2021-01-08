@@ -28,15 +28,7 @@ class ResNet50_classifier(nn.Module):
             torchvision.transforms.ToTensor()
         ])
         
-        self.resnet50.classifier = nn.Sequential(
-            nn.Linear(25088, self.hidden_size*2),
-            nn.ReLU(),
-            nn.Dropout(self.dropout),
-            nn.Linear(self.hidden_size*2, self.hidden_size),
-            nn.ReLU(),
-            nn.Dropout(self.dropout),
-            nn.Linear(self.hidden_size, self.classes)
-        )
+        self.resnet50.fc = nn.Linear(512, self.classes)
 
     def forward(self, x):
         if self.preprocess_flag:
