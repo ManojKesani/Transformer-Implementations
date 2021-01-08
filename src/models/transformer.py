@@ -8,6 +8,42 @@ import torchvision.models as models
 
 import math
 
+class RESNET_classifier(nn.Module):
+    def __init__(self, classes, hidden_size, img_size_preprocess=224, preprocess_flag=False, dropout=0.1):
+        super(RESNET_classifier, self).__init__()
+
+        self.classes = classes
+        self.hidden_size = hidden_size
+        self.img_size_preprocess = img_size_preprocess
+        self.preprocess_flag = preprocess_flag
+        self.dropout = dropout
+        
+        self.resnet18 = models.resnet18(pretrained=True)
+
+        for parameter in self.resnet18.parameters():
+            parameter.requires_grad = False
+
+        self.preprocess = torchvision.transforms.Compose([
+            torchvision.transforms.Resize(size=(self.img_size_preprocess, self.img_size_preprocess)),
+            torchvision.transforms.ToTensor()
+        ])
+        
+        self.resnet18.classifier = nn.Sequential(
+            nn.Linear(25088, self.hidden_size*2),
+            nn.ReLU(),
+            nn.Dropout(self.dropout),
+            nn.Linear(self.hidden_size*2, self.hidden_size),
+            nn.ReLU(),
+            nn.Dropout(self.dropout),
+            nn.Linear(self.hidden_size, self.classes)
+        )
+
+    def forward(self, x):
+        if self.preprocess_flag:
+            x = self.preprocess(x)
+        x = self.resnet18(x)
+        return x
+
 
 class MultiHeadAttention(nn.Module):
     def __init__(self, embed_size, num_heads, dropout=0.2, batch_dim=0):
