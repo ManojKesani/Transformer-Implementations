@@ -8,9 +8,9 @@ import torchvision.models as models
 
 import math
 
-class RESNET_classifier(nn.Module):
+class ResNet50_classifier(nn.Module):
     def __init__(self, classes, hidden_size, img_size_preprocess=224, preprocess_flag=False, dropout=0.1):
-        super(RESNET_classifier, self).__init__()
+        super(ResNet50_classifier, self).__init__()
 
         self.classes = classes
         self.hidden_size = hidden_size
@@ -18,9 +18,9 @@ class RESNET_classifier(nn.Module):
         self.preprocess_flag = preprocess_flag
         self.dropout = dropout
         
-        self.resnet18 = models.resnet18(pretrained=True)
+        self.resnet50 = models.resnet50(pretrained=True)
 
-        for parameter in self.resnet18.parameters():
+        for parameter in self.resnet50.parameters():
             parameter.requires_grad = False
 
         self.preprocess = torchvision.transforms.Compose([
@@ -28,7 +28,7 @@ class RESNET_classifier(nn.Module):
             torchvision.transforms.ToTensor()
         ])
         
-        self.resnet18.classifier = nn.Sequential(
+        self.resnet50.classifier = nn.Sequential(
             nn.Linear(25088, self.hidden_size*2),
             nn.ReLU(),
             nn.Dropout(self.dropout),
@@ -41,7 +41,7 @@ class RESNET_classifier(nn.Module):
     def forward(self, x):
         if self.preprocess_flag:
             x = self.preprocess(x)
-        x = self.resnet18(x)
+        x = self.resnet50(x)
         return x
 
 
